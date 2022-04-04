@@ -31,7 +31,10 @@ isNotInSystemNs:{
 
 getDeclErrorsFromFunction:{[scope;i;f]
   fv: value f;
-  globals: {x where isNotInSystemNs each x} 1 _ fv[3];
+  globalsToIgnore:enlist `sublist;
+  //TODO get rid of these where statements and find another way to filter a list. 
+  // Does not work when where evaluates to 1b, when then tries to index as 1.
+  globals: {x where isNotInSystemNs each x} (1 _ fv[3]) except globalsToIgnore;
   violations: globals where i < (key scope) ? globals;
   subFunctions: {x where 100h = type each x} -5 _ (3 _ fv);
   subViolations: raze .z.s[scope;i] each subFunctions;
@@ -40,7 +43,7 @@ getDeclErrorsFromFunction:{[scope;i;f]
 
 getDeclErrorsFromGeneralList:{[scope;i;x]
   // TODO - this is currently a way to use yet-to-be-defined variables
-  ()
+  `TODO
  };
 
 getDeclErrors:{[scope;i;x]
