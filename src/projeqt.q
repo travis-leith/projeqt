@@ -1,19 +1,30 @@
+parseWithNamespace:{[codeString]
+  parseTree: parse codeString;
+  $[
+    (2 = count parseTree) & (10h = type parseTree[1]) & 105h = type parseTree[0];
+    {$[
+      (`d ~ x[1;0]) & ";" ~ x[0];
+      `namespace`parseTree!(enlist x[1;1]), (enlist 2 _ x);
+      '"Unhandled system command (\\", string x[1;0], ") encountered in parse tree."
+    ]} parse parseTree[1];
+    ";" ~ parseTree[0];
+    `namespace`parseTree!(enlist `), (enlist 1 _ parseTree);
+    '"All statements in a code file must be separated by ';'."
+  ]
+ };
+
 getScopeFromTree:{[parseTree]
   extractAssignment:{[subTree]
     $[
       (3 = count subTree) & (:) ~ subTree[0];
       ((enlist subTree[1])!(enlist subTree[2]));
-      null subTree[0];
+      null subTree;
       ()!();
       '"unhandled function '", (string subTree[0]), "', or cardinality (", (string count subTree), ") encountered in parse tree element"
     ]
   };
 
-  $[
-    ";" ~ parseTree[0];
-    raze extractAssignment each -1 _ (1 _ parseTree); //drop the first and last element
-    '"unhandled function '", (string parseTree[0]), "' encountered in parse tree root"
-  ]
+  raze extractAssignment each parseTree
  };
 
 isNotInSystemNs:{
@@ -29,21 +40,35 @@ isNotInSystemNs:{
   ]
  };
 
+getGlobalsFromFunctionValue:{[fv]
+  globalsToIgnore:`sublist`trim`ltrim`rtrim`parse`system;
+  {x where isNotInSystemNs each x} (1 _ fv[3]) except globalsToIgnore
+ };
+
 getDeclErrorsFromFunction:{[scope;i;f]
   fv: value f;
-  globalsToIgnore:enlist `sublist;
-  //TODO get rid of these where statements and find another way to filter a list. 
-  // Does not work when where evaluates to 1b, when then tries to index as 1.
-  globals: {x where isNotInSystemNs each x} (1 _ fv[3]) except globalsToIgnore;
+  globals: getGlobalsFromFunctionValue fv;
   violations: globals where i < (key scope) ? globals;
   subFunctions: {x where 100h = type each x} -5 _ (3 _ fv);
   subViolations: raze .z.s[scope;i] each subFunctions;
   distinct violations, subViolations
  };
 
+getGlobalsFromGeneralList:{
+  $[
+    -11h = type x;
+    enlist x;
+    100h = type x;
+    getGlobalsFromFunctionValue value x;
+    0h = type x;
+    raze .z.s each x;
+    ()
+  ]
+ };
+
 getDeclErrorsFromGeneralList:{[scope;i;x]
-  // TODO - this is currently a way to use yet-to-be-defined variables
-  `TODO
+  globals: getGlobalsFromGeneralList x;
+  distinct globals where i < (key scope) ? globals
  };
 
 getDeclErrors:{[scope;i;x]
@@ -52,7 +77,7 @@ getDeclErrors:{[scope;i;x]
     getDeclErrorsFromFunction[scope;i;x];
     0h = type x;
     getDeclErrorsFromGeneralList[scope;i;x];
-    type x in 1h;
+    20 > abs type x;
     ();
     '"unhandled type (", (string type x), ") encountered when type to get declaration errors"
   ]
@@ -66,6 +91,6 @@ analyzeScope:{[scope]
 parseFunctionBody:{
   s:string x;
   n: count s;
-  i:1+first (string hTree) ss "]";
+  i:1+first s ss "]";
   parse trim s[i + til n - i + 1]
  };
