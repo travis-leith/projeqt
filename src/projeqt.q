@@ -4,27 +4,37 @@ parseWithNamespace:{[codeString]
     (2 = count parseTree) & (10h = type parseTree[1]) & 105h = type parseTree[0];
     {$[
       (`d ~ x[1;0]) & ";" ~ x[0];
-      `namespace`parseTree!(enlist x[1;1]), (enlist 2 _ x);
+      `namespace`tree!(enlist x[1;1]), (enlist 2 _ x);
       '"Unhandled system command (\\", string x[1;0], ") encountered in parse tree."
     ]} parse parseTree[1];
     ";" ~ parseTree[0];
-    `namespace`parseTree!(enlist `), (enlist 1 _ parseTree);
+    `namespace`tree!(enlist `), (enlist 1 _ parseTree);
     '"All statements in a code file must be separated by ';'."
   ]
  };
 
-getScopeFromTree:{[parseTree]
-  extractAssignment:{[subTree]
+prepNs:{[ns;sym]
+  $[
+    ` = ns;
+    sym;
+    "." = (string sym)[0];
+    sym;
+    ` sv (ns,sym)
+  ]
+ };
+
+getScopeFromTree:{[prse]
+  extractAssignment:{[ns;subTree]
     $[
       (3 = count subTree) & (:) ~ subTree[0];
-      ((enlist subTree[1])!(enlist subTree[2]));
+      ((enlist prepNs[ns;subTree[1]])!(enlist ns, enlist subTree[2]));
       null subTree;
       ()!();
       '"unhandled function '", (string subTree[0]), "', or cardinality (", (string count subTree), ") encountered in parse tree element"
     ]
   };
 
-  raze extractAssignment each parseTree
+  raze extractAssignment[prse.namespace] each prse `tree
  };
 
 isNotInSystemNs:{
@@ -45,12 +55,12 @@ getGlobalsFromFunctionValue:{[fv]
   {x where isNotInSystemNs each x} (1 _ fv[3]) except globalsToIgnore
  };
 
-getDeclErrorsFromFunction:{[scope;i;f]
+getDeclErrorsFromFunction:{[scope;i;ns;f]
   fv: value f;
-  globals: getGlobalsFromFunctionValue fv;
+  globals: prepNs[ns] each getGlobalsFromFunctionValue fv;
   violations: globals where i < (key scope) ? globals;
   subFunctions: {x where 100h = type each x} -5 _ (3 _ fv);
-  subViolations: raze .z.s[scope;i] each subFunctions;
+  subViolations: raze .z.s[scope;i;ns] each subFunctions;
   distinct violations, subViolations
  };
 
@@ -66,18 +76,18 @@ getGlobalsFromGeneralList:{
   ]
  };
 
-getDeclErrorsFromGeneralList:{[scope;i;x]
-  globals: getGlobalsFromGeneralList x;
+getDeclErrorsFromGeneralList:{[scope;i;ns;x]
+  globals: prepNs[ns] each getGlobalsFromGeneralList x;
   distinct globals where i < (key scope) ? globals
  };
 
 getDeclErrors:{[scope;i;x]
   $[
-    100h = type x;
-    getDeclErrorsFromFunction[scope;i;x];
-    0h = type x;
-    getDeclErrorsFromGeneralList[scope;i;x];
-    20 > abs type x;
+    100h = type x[1];
+    getDeclErrorsFromFunction[scope;i;x[0];x[1]];
+    0h = type x[1];
+    getDeclErrorsFromGeneralList[scope;i;x[0];x[1]];
+    20 > abs type x[1];
     ();
     '"unhandled type (", (string type x), ") encountered when type to get declaration errors"
   ]
