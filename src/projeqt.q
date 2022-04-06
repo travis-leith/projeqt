@@ -34,7 +34,7 @@ getScopeFromTree:{[prse]
     ]
   };
 
-  raze extractAssignment[prse.namespace] each prse `tree
+  raze extractAssignment[prse `namespace] each prse `tree
  };
 
 isNotInSystemNs:{

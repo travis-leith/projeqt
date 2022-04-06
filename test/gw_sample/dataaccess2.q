@@ -194,7 +194,7 @@ getdata:{[o]
     default:`timeout`postback`sublist`getquery`queryoptimisation`postprocessing!(0Wn;();0W;0b;1b;{:x;});
     // Use upserting logic to determine behaviour
     options:default,o;
-    if[`ordering in key o;options[`ordering]: .go each options`ordering];
+    if[`ordering in key o;options[`ordering]: go each options`ordering];
     o:adjustqueries[o;partdict o];
     options[`mapreduce]:0b;
     gr:$[`grouping in key options;options`grouping;`];

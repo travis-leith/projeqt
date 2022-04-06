@@ -39,20 +39,20 @@
 // dictionary containing the functions needed to aggregate results together for
 // map reducable aggregations
 .dataaccess.mapaggregate:(!). flip(
-    (`avg;      {enlist[`$"avg",x]!enlist(%;(sum;`$"sum",x);scx x)});
-    (`cor;      {enlist[`$"cor",x,w]!enlist(%;covf[x;w];(*;(sqrt;varf[x;x]);(sqrt;varf[(x:x 0);w:x 1])))});
-    (`count;    {enlist[`$"count",x]!enlist scx x});
-    (`cov;      {enlist[`$"cov",x,w]!enlist covf[x:x 0;w:x 1]});
-    (`dev;      {enlist[`$"dev",x]!enlist(sqrt;varf[x;x])});
+    (`avg;      {enlist[`$"avg",x]!enlist(%;(sum;`$"sum",x);.dataaccess.scx x)});
+    (`cor;      {enlist[`$"cor",x,w]!enlist(%;.dataaccess.covf[x;w];(*;(sqrt;.dataaccess.varf[x;x]);(sqrt;.dataaccess.varf[(x:x 0);w:x 1])))});
+    (`count;    {enlist[`$"count",x]!enlist .dataaccess.scx x});
+    (`cov;      {enlist[`$"cov",x,w]!enlist .dataaccess.covf[x:x 0;w:x 1]});
+    (`dev;      {enlist[`$"dev",x]!enlist(sqrt;.dataaccess.varf[x;x])});
     (`first;    {enlist[`$"first",x]!enlist(*:;`$"first",x)});
-    (`last;     {absagg["last";x]});
-    (`max;      {absagg["max";x]});
-    (`min;      {absagg["min";x]});
-    (`prd;      {absagg["prd";x]});
-    (`sum;      {absagg["sum";x]});
-    (`var;      {enlist[`$"var",x]!enlist varf[x;x]});
-    (`wavg;     {enlist[`$"wavg",x,w]!enlist(%;swsum[x:x 0;w:x 1];(sum;`$"sum",x))});
-    (`wsum;     {enlist[`$"wsum",x,w]!enlist swsum[x:x 0;w:x 1]}));
+    (`last;     {.dataaccess.absagg["last";x]});
+    (`max;      {.dataaccess.absagg["max";x]});
+    (`min;      {.dataaccess.absagg["min";x]});
+    (`prd;      {.dataaccess.absagg["prd";x]});
+    (`sum;      {.dataaccess.absagg["sum";x]});
+    (`var;      {enlist[`$"var",x]!enlist .dataaccess.varf[x;x]});
+    (`wavg;     {enlist[`$"wavg",x,w]!enlist(%;.dataaccess.swsum[x:x 0;w:x 1];(sum;`$"sum",x))});
+    (`wsum;     {enlist[`$"wsum",x,w]!enlist .dataaccess.swsum[x:x 0;w:x 1]}));
 
 // function to convert sorting
 .dataaccess.go:{if[`asc=x[0];:(xasc;x[1])];:(xdesc;x[1])};
