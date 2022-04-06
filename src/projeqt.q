@@ -57,7 +57,7 @@ getGlobalsFromFunctionValue:{[fv]
 
 getDeclErrorsFromFunction:{[scope;i;ns;f]
   fv: value f;
-  globals: prepNs[ns] each getGlobalsFromFunctionValue fv;
+  globals: `symbol$ prepNs[ns] each getGlobalsFromFunctionValue fv;
   violations: globals where i < (key scope) ? globals;
   subFunctions: {x where 100h = type each x} -5 _ (3 _ fv);
   subViolations: raze .z.s[scope;i;ns] each subFunctions;
@@ -72,7 +72,7 @@ getGlobalsFromGeneralList:{
     getGlobalsFromFunctionValue value x;
     0h = type x;
     raze .z.s each x;
-    ()
+    `symbol$()
   ]
  };
 
@@ -88,7 +88,7 @@ getDeclErrors:{[scope;i;x]
     0h = type x[1];
     getDeclErrorsFromGeneralList[scope;i;x[0];x[1]];
     20 > abs type x[1];
-    ();
+    `symbol$();
     '"unhandled type (", (string type x), ") encountered when type to get declaration errors"
   ]
  };
