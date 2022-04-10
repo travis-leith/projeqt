@@ -93,16 +93,22 @@ getDeclErrors:{[scope;i;x]
   ]
  };
 
-getScopeFromProject:{[projectPath]
-    projectFile: .j.k "c"$read1 projectPath;
-    workingDirectory: first ` vs projectPath;
+loadProjectFile:{[filePath]
+    projectFile: .j.k "c"$read1 filePath;
+    workingDirectory: first ` vs filePath;
     libRefs: {` sv x ,y}[workingDirectory] each `$ projectFile `libRefs;
     sourceFiles: {` sv x ,y}[workingDirectory] each `$ projectFile `sourceFiles;
-    libScope: raze .z.s each libRefs;
 
-    sourceCode: {"c"$read1 x} each sourceFiles;
-    prses: parseWithNamespace each sourceCode;
-    projectScope: raze getScopeFromTree each prses;
+    projectFile[`sourceFiles]:{"c"$read1 x} each sourceFiles;
+    projectFile[`libRefs]:.z.s each libRefs;
+    projectFile
+ };
+
+getScopeFromProject:{[projectFile]
+    libScope: raze .z.s each projectFile `libRefs;
+
+    parseList: parseWithNamespace each projectFile `sourceFiles;;
+    projectScope: raze getScopeFromTree each parseList;
     
     :libScope, projectScope;
  };
