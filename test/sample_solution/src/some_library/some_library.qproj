@@ -1,0 +1,8 @@
+{
+	"projectType": "library",
+	"sourceFiles": [
+		"helpers.q",
+		"main.q"
+	],
+	"libRefs": []
+}

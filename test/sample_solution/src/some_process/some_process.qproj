@@ -1,0 +1,9 @@
+{
+	"projectType": "process",
+	"sourceFiles": [
+		"some_process.q"
+	],
+	"libRefs": [
+		"../some_library/some_library.qproj"
+	]
+}

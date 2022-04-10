@@ -93,6 +93,20 @@ getDeclErrors:{[scope;i;x]
   ]
  };
 
+getScopeFromProject:{[projectPath]
+    projectFile: .j.k "c"$read1 projectPath;
+    workingDirectory: first ` vs projectPath;
+    libRefs: {` sv x ,y}[workingDirectory] each `$ projectFile `libRefs;
+    sourceFiles: {` sv x ,y}[workingDirectory] each `$ projectFile `sourceFiles;
+    libScope: raze .z.s each libRefs;
+
+    sourceCode: {"c"$read1 x} each sourceFiles;
+    prses: parseWithNamespace each sourceCode;
+    projectScope: raze getScopeFromTree each prses;
+    
+    :libScope, projectScope;
+ };
+
 analyzeScope:{[scope]
   declErrors: (til count scope) getDeclErrors[scope]' (value scope);
   (key scope)!declErrors
